@@ -13,17 +13,8 @@ const part2 = (elves: number[][]) =>
 
 
 const fileRaw = await readFile('input/day01.txt', { encoding : 'utf-8'});
-const input = fileRaw.split('\n');
-let elves: number[][] = [];//elves are a collection of calories
-let elf: number[] = []; //current elf calories
-for (let elem of input){
-    if (elem.trim() === ""){
-        elves.push(elf);
-        elf = [];
-    }else{
-        elf.push(Number(elem));
-    }
-}
+const elves = fileRaw.split(/\r?\n\r?\n/) // 2 new line splits regardless of OS
+                     .map(elfSegment => elfSegment.split('\n').map(Number));
 
 const answer1 = part1(elves);
 const answer2 = part2(elves);
