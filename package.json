@@ -1,0 +1,25 @@
+{
+  "name": "aoc_2022",
+  "version": "1.0.0",
+  "description": "Advent Of Code 2022",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean":"rimraf out"
+  },
+  "keywords": [
+    "advent",
+    "of",
+    "code",
+    "2022",
+    "node"
+  ],
+  "author": "danielmayorga",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.11.10",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.9.3"
+  }
+}
