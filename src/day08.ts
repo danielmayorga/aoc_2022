@@ -1,104 +1,126 @@
 import { readFile } from 'fs/promises';
 
-function part1(grid: number[][]){
-    let visible = new Set<number>();
-    function setVisible(row: number, column: number){
+class VisibleEntry{
+    #visible = new Set<number>();
+    setVisible = (row: number, column: number) => {
         let position = row*grid[0].length+column;
-        visible.add(position);
+        this.#visible.add(position);
     }
+    get count(){
+        return this.#visible.size;
+    }
+}
+
+/**
+ * Runtime O(Row*Column) we keep track of our previous largest tree in 4 directions (Up, Down, Left, Right)
+ * if we are bigger than the previous larget tree, we are visible and now the new previous largest tree
+ * @param grid 
+ * @returns visible trees
+ */
+function part1(grid: number[][]){
+    var visibleEntry = new VisibleEntry();
+    const rowLength = grid.length;
+    const columnLength = grid[0].length;
+    /**
+     * Iterates through with dx/dy changes, if the row and column iterators are out of bounds stops
+     * This is a little more complex and not my original submission, but I've revisited this code
+     * in order to cut down repetition
+     * @param rowStart starting position of row
+     * @param columnStart - starting position of column
+     * @param dx - alteration of row
+     * @param dy - alteration of column
+     */
+    function iterate(rowStart: number, columnStart: number, dx: number, dy: number){
+        //always keep track of your previous largest tree. If you are bigger, you are visible.
+        let previousLargestTree = grid[rowStart][columnStart];
+        //the initial position is always visible
+        visibleEntry.setVisible(rowStart, columnStart);
+        for(
+            let row = rowStart, column = columnStart; //initialize
+            row >=0  && row<rowLength && column >= 0 && column < columnLength; //condition
+            row+=dx, column+=dy // update
+            ){ 
+            const current = grid[row][column];
+            //if you are bigger than the previous largest tree, you are visible AND 
+            //you are now the previous largest tree
+            if (current > previousLargestTree){
+                visibleEntry.setVisible(row,column);
+                previousLargestTree = current;
+            }
+        }
+    }
+
     for(let row=0; row< grid.length; row++){
         //left to right
-        let previous = grid[row][0];
-        setVisible(row, 0);
-        for(let column=1; column <grid[row].length; column++){
-            const current = grid[row][column];
-            if (current > previous){
-                setVisible(row,column);
-                previous = current;
-            }
-        }
+        iterate(row, 0, 0, 1);
         //right to left
-        previous = grid[row][grid[row].length-1];
-        setVisible(row, grid[row].length-1);
-        for (let column=grid[row].length-2; column>=0; column--){
-            const current = grid[row][column];
-            if (current > previous){
-                setVisible(row,column);
-                previous = current;
-            }
-        }
+        iterate(row,columnLength-1, 0, -1);
     }
     for(let column=0; column <grid[0].length; column++){
         //top to bottom
-        let previous = grid[0][column];
-        setVisible(0, column);
-        for(let row=1; row< grid.length; row++){
-            const current = grid[row][column];
-            if (current > previous){
-                setVisible(row,column);
-                previous = current;
-            }
-        }
+        iterate(0, column, 1, 0);
         //bottom to top
-        previous = grid[grid.length-1][column];
-        setVisible(grid.length-1, column);
-        for(let row=grid.length-2; row>=0; row--){
-            const current = grid[row][column];
-            if (current > previous){
-                setVisible(row,column);
-                previous = current;
-            }
-        }
+        iterate(rowLength-1, column, -1, 0);
     }
-    return visible.size;
+    return visibleEntry.count;
 }
 
+
+/**
+ * Runtime O(Row*Column*(Row+Column)) naive approach - go through each column entry and compute the score.
+ * 
+ * Remarks: I can optomize for O(Row*Column*10) => O(Row*Column) by keeping track of the index of the last occuring tree height
+ * that way we dont have to iterate and check each neighboring cell multiple times instead we just check each tree height taller than it and take the the closest value
+ * However, that makes this more complex to read, and for this challenge I don't benefit from the speed boost.
+ * @param grid 
+ * @returns largest score
+ */
 function part2(grid: number[][]){
-    const rowSize = grid.length;
-    const columnSize = grid[0].length;
-    //gross brute force, I wanted to do some memoization but the logic I had broke down when 
-    //the values were non-descending 5 -> 4 -> 2 -> 3 -> 4, I couldn't memoize for this
-    //I can optomize for O(10) by using a map with last position of a height but don't want to write it
+    const rowLength = grid.length;
+    const columnLength = grid[0].length;
+    /**
+     * Trying to cut back on repetition at the cost of complexity
+     * This isn't my original submission, but a refactor. 
+     * Check original git commit to see a more verbose...yet easier to understand solution
+     * @param value value of cell
+     * @param rowStart starting row position
+     * @param columnStart starting column position
+     * @param dx alteration to row each iteration
+     * @param dy alteration to column each iteration
+     * @returns score of that axis
+     */
+    function scoreHelper(value: number, rowStart: number, columnStart: number, dx: number, dy: number){
+        let score = 0;
+        for(
+            let row = rowStart, column = columnStart; //initialize
+            row >=0  && row<rowLength && column >= 0 && column < columnLength; //condition
+            row+=dx, column+=dy // update
+        ){
+            score++;
+            if (grid[row][column] >= value){
+                break;
+            }
+        }
+        return score;
+    }
+
     function scenicScore(row: number, column: number){
-        let value = grid[row][column];
+        const value = grid[row][column];
         //check visible trees to the left
-        let left = 0;
-        for(let r =row-1; r >= 0; r--){
-            left++;
-            if (grid[r][column] >= value){
-                break;
-            }
-        }
+        const left = scoreHelper(value, row-1, column, -1, 0);
         //check visible trees to the right
-        let right = 0;
-        for(let r =row+1; r < rowSize; r++){
-            right++;
-            if (grid[r][column] >= value){
-                break;
-            }
-        }
+        let right = scoreHelper(value, row+1, column, 1, 0);
         //check visible trees atop
-        let atop = 0;
-        for(let c =column-1; c >= 0; c--){
-            atop++;
-            if (grid[row][c] >= value){
-                break;
-            }
-        }
+        let atop = scoreHelper(value, row, column-1, 0, -1);
         //check visible trees below
-        let below = 0;
-        for(let c =column+1; c < columnSize; c++){
-            below++;
-            if (grid[row][c] >= value){
-                break;
-            }
-        }
+        let below = scoreHelper(value, row, column+1, 0, 1);
+        //calculate score
         return atop*left*right*below;
     }
 
     let max = 0;
-    for (let row =0; row< rowSize; row++){
-        for (let column=0; column<columnSize; column++){
+    for (let row =0; row< rowLength; row++){
+        for (let column=0; column<columnLength; column++){
             max = Math.max(scenicScore(row,column), max)
         }
     }
