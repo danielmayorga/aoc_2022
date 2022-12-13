@@ -155,3 +155,24 @@ My first thought was to reverse the traversal (from E to S vs part 1's S to E), 
 I noticed all my `a` heights were in the left hand side so I did a hack in my code where I kept the same DFS and just set the cost of each newly encountered `a` to 0. Surprisingly that gave me the correct answer and I solved it pretty fast. However, that solution will not always work. There are positions in the graph that will break that logic. i.e. if the most optimal `a` is to the right most node past `E` from `S`.
 
 I might revisit this with a correct solution, but this is advent of code. I only really care about MY solution.
+
+### Day 13
+
+Halfway point.
+
+Day 13 saw me using some interesting things: recursive typing (typescript) and `eval`.
+
+I used `eval` to convert the arrays to real arrays. I used the recursive type to properly type the arrays.
+
+This problems logic resides in recursive helper function `rigthtOrder`. 
+It compares two arrays and returns 
+
+- true if it is in the right order. 
+- false if it is in the wrong order.
+- undefined if the comparison is equal.
+
+You are handling ternary logic in the fuction and want to short circuit when you have a boolean output, but want to continue if you have an undefined output.
+
+#### part 2 
+
+We use `rightOrder` to sort. 
