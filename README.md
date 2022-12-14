@@ -176,3 +176,19 @@ You are handling ternary logic in the fuction and want to short circuit when you
 #### part 2 
 
 We use `rightOrder` to sort. 
+
+### Day 14
+
+Created a Simulation class with a primary method called `addSand` that returns true if sand was added, return false otherwise.
+
+The simluation uses a 2-dimensional array of size 500. The size is arbitrary and we could have made it smaller if we got the min/max of the lines.
+
+We have a recursive method called `dropSand`. That returns true if sand was dropped or was sent to the void. It returns false if you can not set sand. We use this boolean nature to short circuit some logic.
+
+How do we keep track if a change occurred? a `Set`. If the set size changes after dropSand we know it didn't go to the void.
+
+#### part 2
+We added 2 bits of logic to our general solution:
+
+- if we try to add sand and the source's location is already occupied then return false.
+- we add the additional condition of Max Y height + 2 will always return true for `hasElement` since the line is infinite.
