@@ -192,3 +192,25 @@ We added 2 bits of logic to our general solution:
 
 - if we try to add sand and the source's location is already occupied then return false.
 - we add the additional condition of Max Y height + 2 will always return true for `hasElement` since the line is infinite.
+
+### Day 15
+
+Instead of the naive approach creating some arbitrary axis and filling each intermediate space, I used Ranges(Intervals) to solve this problem.
+
+I checked if ranges overlap, and if so I merged them. This reduces the space required and I also believe time complexity.
+
+#### Part 1
+
+In part 1, I created ranges for the X positions on Y = 2_000_000.
+
+Then I merged the ranges that I could. With these reduced ranges, I summed their intervals and BAM we have the answer.
+
+#### Part 2
+
+In part 2, I did do a sorta naive approach. I still use ranges, but I iterate from Y = 0 to Y = 4_000_000.
+
+I have a helper function to find the available x position for a given range if it exists. 
+
+once i find the availble x position in a given y position. I just do the "frequency tuning" algorithm defined in part 2 and call it a day. 
+
+While I'm confident in the performance of part 1, part 2 has me curious if there is a better approach. On my machine, with my input both parts ran together in ~1 second.
