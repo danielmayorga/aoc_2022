@@ -230,5 +230,7 @@ Runtime is O(V^3) + O(V!)...which is pretty bad, but our V's are pretty small. I
 ### Part 2
 
 I use a greedy algorithm to determine if the elephant or I should move.
-Aside from that I try all permutations which is super terrible runtime wise.
-Maybe there is some way to memoize data but I can't really figure out that logic?
+
+I have a memoized table of function parameters, if we are in a state that is NOT optimal. Backout. I think this is callled backtracking.
+
+My solution works in 6 seconds on my input
