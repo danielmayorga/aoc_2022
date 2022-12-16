@@ -214,3 +214,15 @@ I have a helper function to find the available x position for a given range if i
 once i find the availble x position in a given y position. I just do the "frequency tuning" algorithm defined in part 2 and call it a day. 
 
 While I'm confident in the performance of part 1, part 2 has me curious if there is a better approach. On my machine, with my input both parts ran together in ~1 second.
+
+### Day 16
+
+This problem is stumped me. I pulled out some pen and paper and convince myself the solution to part 1 is as follows:
+
+1. Create a Graph like structure with the valves
+2. Find All-Pairs-Shortest-Path for each valve with weight !== 0
+3. I can probably find some heiristic for the shortest path from there but worst case brute force the node order so O(V!)...which may not be the most optimal solution
+
+The runtime is terrible: O(V^3) + O(V!)
+
+This seems like a variant of the travelling salesman for part 3, I can't know the optimal path without travelling to all them.
