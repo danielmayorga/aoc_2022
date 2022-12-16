@@ -73,6 +73,56 @@ function part1(valves: Valve[]){
 
 
 function part2(valves: Valve[]){
+
+    const graph = new Map<string, Valve>();
+    for (let valve of valves){
+        graph.set(valve.name, valve);
+    }
+
+    const cost = floyd(graph);
+    const visited = new Set<string>();
+    const flowValves = valves.filter(valve => valve.flowRate >0)
+                             .map(valve => valve.name);
+
+    const pairs: [string,string][] = [];
+    for(let i=0; i<flowValves.length; i++){
+        for(let j=i+1; j<flowValves.length; j++){
+            pairs.push([flowValves[i], flowValves[j]]);
+        }
+    }
+
+    function flowRecurse(curr: string, elephant: string, myflowRate: number, elephantFlowRate: number, myMinutes: number, elephantMinutes: number){
+        if (visited.size === flowValves.length){
+            return elephantFlowRate*elephantMinutes + myMinutes*myflowRate;
+        }
+
+        let flowPaths = 
+            flowValves
+                .filter(valve => !visited.has(valve))
+                .map(valve=>{
+                    visited.add(valve);
+
+                    const valveFlow = graph.get(valve)?.flowRate as number;
+                    
+                    const myCost = cost[curr][valve] as number+1;
+                    const elephantCost = cost[elephant][valve] as number+1;
+                    const myDiff = myMinutes-elephantMinutes;
+                    let result: number;
+                    if ((myCost-myDiff) < elephantCost){
+                        //I'll move
+                        const minutes = Math.min(myCost, myMinutes);
+                        result = (myflowRate*minutes)+flowRecurse(valve, elephant, myflowRate+valveFlow, elephantFlowRate, myMinutes-minutes,elephantMinutes);    
+                    }else{
+                        //elephant moves
+                        const minutes = Math.min(elephantCost, elephantMinutes);
+                        result = (elephantFlowRate*minutes)+flowRecurse(curr, valve, myflowRate, elephantFlowRate+valveFlow, myMinutes,elephantMinutes-minutes);    
+                    }
+                    visited.delete(valve);
+                    return result;
+                });
+        return Math.max(...flowPaths);
+    }
+    return flowRecurse("AA", "AA", 0, 0, 26, 26);
 }
 
 const regex = /Valve ([A-Z]+) has flow rate=(-?\d+); tunnels? leads? to valves? (.*)/;
@@ -90,6 +140,6 @@ const valves = fileRaw.split(/\r?\n/)
 
 
 const answer1 = part1(valves);
+console.log(`part 1: ${answer1}`);
 const answer2 = part2(valves);
-
-console.log(`part 1: ${answer1}\npart 2: ${answer2}`);
+console.log(`part 2: ${answer2}`);

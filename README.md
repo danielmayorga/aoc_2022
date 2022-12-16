@@ -228,3 +228,7 @@ This problem is stumped me because I didn't know about all pairs shortest path, 
 Runtime is O(V^3) + O(V!)...which is pretty bad, but our V's are pretty small. In my case there are 15 and it ran in < 1 second.
 
 ### Part 2
+
+I use a greedy algorithm to determine if the elephant or I should move.
+Aside from that I try all permutations which is super terrible runtime wise.
+Maybe there is some way to memoize data but I can't really figure out that logic?
