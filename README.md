@@ -217,12 +217,14 @@ While I'm confident in the performance of part 1, part 2 has me curious if there
 
 ### Day 16
 
-This problem is stumped me. I pulled out some pen and paper and convince myself the solution to part 1 is as follows:
+This problem is stumped me because I didn't know about all pairs shortest path, but knew I needed it.
+
+### Part 1
 
 1. Create a Graph like structure with the valves
 2. Find All-Pairs-Shortest-Path for each valve with weight !== 0
-3. I can probably find some heiristic for the shortest path from there but worst case brute force the node order so O(V!)...which may not be the most optimal solution
+3. Iterate through all possible combinations of the weighted valve nodes 
 
-The runtime is terrible: O(V^3) + O(V!)
+Runtime is O(V^3) + O(V!)...which is pretty bad, but our V's are pretty small. In my case there are 15 and it ran in < 1 second.
 
-This seems like a variant of the travelling salesman for part 3, I can't know the optimal path without travelling to all them.
+### Part 2
