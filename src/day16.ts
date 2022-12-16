@@ -78,85 +78,60 @@ function part2(valves: Valve[]){
     }
 
     const cost = floyd(graph);
-    const visited = new Set<number>();
+    const visited = new Set<string>();
     const flowValves = valves.filter(valve => valve.flowRate >0)
                              .map(valve => valve.name);
 
-    //i'm converting the graph to arrays to try to squeeze out some performance
-    //this might be in pointless
-    const optomizedCost: number[][] = new Array(flowValves.length+1);
-    const interimValves = ["AA", ...flowValves].map((elem, index) => ({ valve: elem, index}));
-    const optimizedValves = flowValves.map((_,index) => index+1);
-    const optimizedValveFlow: number[] = new Array(flowValves.length+1);
-    for(let { valve , index } of interimValves){
-        optomizedCost[index]=new Array(interimValves.length);
-        optimizedValveFlow[index] = graph.get(valve)?.flowRate as number;
-        for(let {valve: neighbor, index: neighborIndex} of interimValves){
-            optomizedCost[index][neighborIndex] = cost[valve][neighbor] as number;
-        } 
-    }
-    //memo of optimum position
-    const memoOptimum: number[][][][]= new Array(27);
-    for (let i=0; i<memoOptimum.length; i++){
-        memoOptimum[i] = new Array(27);
-        for (let j=0; j<27; j++){
-            memoOptimum[i][j] = new Array(optimizedValveFlow.length+1);
-            for (let k=0; k<optimizedValveFlow.length+1; k++){
-                memoOptimum[i][j][k] = new Array(optimizedValveFlow.length+1).fill(0);
-            }
-        }
-    }
-    const isLessOptimal = (currIndex: number, elephantIndex: number, myflowRate: number, elephantFlowRate: number, myMinutes: number, elephantMinutes: number, flowSoFar: number) =>{
-        const current = (myflowRate*myMinutes + elephantFlowRate*elephantMinutes)+flowSoFar;
+    /** Memo of function state, stores the most optimal move given positioning */
+    const memoOptimum = new Map<string, number>();
 
-        if (memoOptimum[myMinutes][elephantMinutes][currIndex][elephantIndex] > current){
+    /** returns true if you are performaning an un-optimal move so you can break out of the loop and 
+     * try other candidates worth your time
+     */
+    const isLessOptimal = (currIndex: string, elephantIndex: string, myflowRate: number, elephantFlowRate: number, myMinutes: number, elephantMinutes: number, flowSoFar: number) =>{
+        const current = (myflowRate*myMinutes + elephantFlowRate*elephantMinutes)+flowSoFar;
+        const key = `${currIndex},${elephantIndex},${myMinutes},${elephantMinutes}`;
+        const memoVal = memoOptimum.get(key) ?? 0;
+        if (memoVal > current){
             return true;
         }
-        memoOptimum[myMinutes][elephantMinutes][currIndex][elephantIndex] = current;
+        memoOptimum.set(key,current);
         return false;
     };
 
-    const initialPerformance = performance.now();
-    let previousPerformance = initialPerformance;
-    function flowRecurse(currIndex: number, elephantIndex: number, myflowRate: number, elephantFlowRate: number, myMinutes: number, elephantMinutes: number, flowSoFar: number){
-        if (visited.size === optimizedValves.length){
+    function flowRecurse(myValve: string, elephantValve: string, myflowRate: number, elephantFlowRate: number, myMinutes: number, elephantMinutes: number, flowSoFar: number){
+        if (visited.size === flowValves.length){
             return elephantFlowRate*elephantMinutes + myMinutes*myflowRate + flowSoFar;
         }
+
         if (myMinutes === 0 && elephantMinutes === 0){
             return flowSoFar;
         }
 
-        if (isLessOptimal(currIndex, elephantIndex, myflowRate, elephantFlowRate, myMinutes, elephantMinutes, flowSoFar)){
+        if (isLessOptimal(myValve, elephantValve, myflowRate, elephantFlowRate, myMinutes, elephantMinutes, flowSoFar)){
             return 0;//not optimal don't explore path
         }
 
         let flowPaths = 
-            optimizedValves
+            flowValves
                 .filter(valve => !visited.has(valve))
-                .map((valve, index)=>{
-                    if (visited.size === 0){
-                        let now = performance.now();
-                        let timeMilli = now-previousPerformance;
-                        previousPerformance = now;
-                        console.log("percentage: "+ Math.floor((index/optimizedValves.length)*100)+"%");
-                        console.log("performance: "+timeMilli+" milliseconds.");
-                    }
+                .map(valve=>{
                     visited.add(valve);
 
-                    const valveFlow = optimizedValveFlow[valve];
+                    const valveFlow = graph.get(valve)?.flowRate as number;
                     
-                    const myCost = optomizedCost[currIndex][valve] as number+1;
-                    const elephantCost = optomizedCost[elephantIndex][valve] as number+1;
+                    const myCost = cost[myValve][valve] as number+1;
+                    const elephantCost = cost[elephantValve][valve] as number+1;
                     const myDiff = myMinutes-elephantMinutes;
                     let result: number;
                     if ((myCost-myDiff) < elephantCost){
                         //I'll move
                         const minutes = Math.min(myCost, myMinutes);
-                        result = flowRecurse(valve, elephantIndex, myflowRate+valveFlow, elephantFlowRate, myMinutes-minutes,elephantMinutes, flowSoFar+ myflowRate*minutes);    
+                        result = flowRecurse(valve, elephantValve, myflowRate+valveFlow, elephantFlowRate, myMinutes-minutes,elephantMinutes, flowSoFar+ myflowRate*minutes);    
                     }else{
                         //elephant moves
                         const minutes = Math.min(elephantCost, elephantMinutes);
-                        result = flowRecurse(currIndex, valve, myflowRate, elephantFlowRate+valveFlow, myMinutes,elephantMinutes-minutes, (elephantFlowRate*minutes)+flowSoFar);    
+                        result = flowRecurse(myValve, valve, myflowRate, elephantFlowRate+valveFlow, myMinutes,elephantMinutes-minutes, (elephantFlowRate*minutes)+flowSoFar);    
                     }
                     visited.delete(valve);
                     return result;
@@ -164,9 +139,7 @@ function part2(valves: Valve[]){
         return Math.max(...flowPaths);
     }
     
-    let result = flowRecurse(0, 0, 0, 0, 26, 26, 0);
-    console.log("Performance total: "+(performance.now()-initialPerformance)+" milliseconds");
-    return result;
+    return flowRecurse("AA", "AA", 0, 0, 26, 26, 0);
 }
 
 const regex = /Valve ([A-Z]+) has flow rate=(-?\d+); tunnels? leads? to valves? (.*)/;
