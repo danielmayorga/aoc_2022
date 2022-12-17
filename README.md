@@ -219,7 +219,7 @@ While I'm confident in the performance of part 1, part 2 has me curious if there
 
 This problem is stumped me because I didn't know about all pairs shortest path, but knew I needed it.
 
-### Part 1
+#### Part 1
 
 1. Create a Graph like structure with the valves
 2. Find All-Pairs-Shortest-Path for each valve with weight !== 0
@@ -227,10 +227,22 @@ This problem is stumped me because I didn't know about all pairs shortest path, 
 
 Runtime is O(V^3) + O(V!)...which is pretty bad, but our V's are pretty small. In my case there are 15 and it ran in < 1 second.
 
-### Part 2
+#### Part 2
 
 I use a greedy algorithm to determine if the elephant or I should move.
 
 I have a memoized table of function parameters, if we are in a state that is NOT optimal. Backout. I think this is callled backtracking.
 
 My solution works in 6 seconds on my input
+
+### Day 17
+
+#### Part 1
+
+Implement the simulations.
+
+#### Part 2
+
+Haven't implemented it yet but my best guess right now is to find a pattern 
+
+|#######| with the initial wind direction will be my `mod` and I can use multiples of it for each cycle
