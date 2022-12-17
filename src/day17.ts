@@ -16,20 +16,11 @@ enum AirflowDirection{
 class Simulation{
     #shaft: boolean[][] = new Array(7);
     #current: RockPiece = RockPiece.Horizontal;
-    #maxHeight = 0;
     #airflow: string;
     #airflowIndex = 0;
-    #currRocks = 0;
-    #maxRocks: number;
 
-    constructor(airflow: string, rocks: number){
+    constructor(airflow: string){
         this.#airflow = airflow;
-        this.#maxRocks = rocks;
-        const maxHeight = rocks*4;
-        for (let i =0; i< this.#shaft.length; i++){
-            this.#shaft[i] = new Array(maxHeight).fill(false);
-        }
-        this.#process();
     }
 
     #updatePiece = () =>{
@@ -70,7 +61,7 @@ class Simulation{
                 !this.#shaft[x+2][y+2];
     }
     #verticalCheck = (x: number, y: number) =>{
-        return  x < 7              &&
+        return  x < 7                &&
                 !this.#shaft[x][y]   &&
                 !this.#shaft[x][y+1] &&
                 !this.#shaft[x][y+2] &&
@@ -169,14 +160,23 @@ class Simulation{
         }
     }
 
-    #getStartingPosition = () =>{
-        return { x: 2, y: this.#maxHeight+3}
-    }
+    process = (rocks: number) => {
+        //clear out the arrays
+        for (let i =0; i< this.#shaft.length; i++){
+            this.#shaft[i] = new Array(rocks*4).fill(false);
+        }
 
-    #process = () => {
+        //initialize max height
+        let maxHeight = 0;
+        
+        //helper function to get starting position
+        const getStartingPosition = () =>{
+            return { x: 2, y: maxHeight+3}
+        }
+
         let airflow = this.#initAirflow();
-        for(this.#currRocks; this.#currRocks<this.#maxRocks; this.#currRocks++){
-            let {x, y} = this.#getStartingPosition();
+        for(let rock=0; rock<rocks; rock++){
+            let {x, y} = getStartingPosition();
             while(true){
                 if (airflow === AirflowDirection.Left){
                     this.#check(x-1,y) ? x-- : x;
@@ -186,7 +186,7 @@ class Simulation{
 
                 if (!this.#check(x, y-1)){
                     this.#setPiece(x,y);
-                    this.#maxHeight = Math.max(this.#maxHeight, this.#calculateHeight(x,y)+1);
+                    maxHeight = Math.max(maxHeight, this.#calculateHeight(x,y)+1);
                     airflow = this.#nextAirflow();
                     break;
                 }
@@ -197,9 +197,8 @@ class Simulation{
         }
         //debug helper 
         //this.#printSimulation();
+        return maxHeight;
     }
-
-    maxHeight = () => this.#maxHeight;
 
     #printSimulation(){
         let output = "";
@@ -214,19 +213,94 @@ class Simulation{
         output += "+-------+";
         console.log(output);
     }
+
+
+    #cycleSet = new Map<string, { height: number, rock: number}>();
+    #cycleHelper(maxHeight: number, rock: number){
+        let deltaString = String(this.#airflowIndex)+",";
+        deltaString += this.#shaft.map(column =>{
+            for (let y = maxHeight; y>0; y--){
+                if (column[y]){
+                    return maxHeight-y;
+                }
+            }
+            return 0;
+        }).join(",");
+
+        if (!this.#cycleSet.has(deltaString)){
+            this.#cycleSet.set(deltaString, { height: maxHeight, rock});
+            //we haven't found a cycle
+            return undefined;
+        }
+        const { height, rock: startCycle}= this.#cycleSet.get(deltaString) as {height: number, rock: number};
+
+        return { startCycle, maxHeight: height};//we have a cycle
+    }
+
+    findCycle = () => {
+        //clear out the arrays
+        for (let i =0; i< this.#shaft.length; i++){
+            this.#shaft[i] = new Array(1_000_000*4).fill(false);
+        }
+
+        //initialize max height
+        let maxHeight = 0;
+        
+        //helper function to get starting position
+        const getStartingPosition = () =>{
+            return { x: 2, y: maxHeight+3}
+        }
+
+        let airflow = this.#initAirflow();
+        for(let rock=1; rock<10_000; rock++){
+            let {x, y} = getStartingPosition();
+            while(true){
+                if (airflow === AirflowDirection.Left){
+                    this.#check(x-1,y) ? x-- : x;
+                }else{//right :P 
+                    this.#check(x+1, y) ? x++: x;
+                }
+
+                if (!this.#check(x, y-1)){
+                    this.#setPiece(x,y);
+                    maxHeight = Math.max(maxHeight, this.#calculateHeight(x,y)+1);
+                    airflow = this.#nextAirflow();
+                    break;
+                }
+                y--;
+                airflow = this.#nextAirflow();
+            }
+            this.#updatePiece();
+            let cycleData = this.#cycleHelper(maxHeight, rock)
+            if (cycleData){
+                return { startCycle: cycleData.startCycle, cycleEnd: rock, cycleHeight: maxHeight-cycleData.maxHeight };
+            }
+        }
+
+        throw new Error("No cycle found")
+    }
 }
 
-const part1 = (airflow: string, rocks: number) =>
-    new Simulation(airflow, rocks).maxHeight();
+const part1 = (airflow: string) =>
+    new Simulation(airflow).process(2022);
 
-function part2(airflow: string, rocks: number){
+//
+function part2(airflow: string){
+    const simulation = new Simulation(airflow);
+    const { startCycle, cycleEnd, cycleHeight } = simulation.findCycle();
+    const nonCycleHeight = simulation.process(startCycle-1);
+    const cycle = BigInt(cycleEnd-startCycle);
+    const divisible = (1_000_000_000_000n - BigInt(startCycle)) / cycle;
+    const remainder = (1_000_000_000_000n - BigInt(startCycle)) % cycle;
+    const remainderHeight = simulation.process(Number(remainder)+startCycle) - simulation.process(Number(startCycle));
+    return divisible*BigInt(cycleHeight)+BigInt(remainderHeight)+BigInt(nonCycleHeight);
 
 }
 
 const fileRaw = await readFile('input/day17.txt', { encoding : 'utf-8'});
 const airflow = fileRaw.trim();
 
-const answer1 = part1(airflow, 2022);
-const answer2 = part2(airflow, 2022);
+const answer1 = part1(airflow);
+const answer2 = part2(airflow);
 
 console.log(`part 1: ${answer1}\npart 2: ${answer2}`);

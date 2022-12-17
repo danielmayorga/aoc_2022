@@ -243,6 +243,15 @@ Implement the simulations.
 
 #### Part 2
 
-Haven't implemented it yet but my best guess right now is to find a pattern 
+In the simulation you can find a cycle. The cycle can be detected by the combonation of 2 things: airflowIndex and the deltas of all the columns.
+My code may be a better indicator of how to find the cycle. After you find the cycle you want to do as follows:
 
-|#######| with the initial wind direction will be my `mod` and I can use multiples of it for each cycle
+``` typescript
+    const { startCycle, cycleEnd, cycleHeight } = simulation.findCycle(); //find the start, end, and cycle height
+    const nonCycleHeight = simulation.process(startCycle-1); //find the height prior to the cycle start
+    const cycle = BigInt(cycleEnd-startCycle); //  calculate the cycle length
+    const divisible = (1_000_000_000_000n - BigInt(startCycle)) / cycle; //find how many times the cycle can fit in rock iterations
+    const remainder = (1_000_000_000_000n - BigInt(startCycle)) % cycle; // NOTE we subtract the start cycle it's not included since prior to this the cycle hasn't started :P
+    const remainderHeight = simulation.process(Number(remainder)+startCycle) - simulation.process(Number(startCycle)); //we find the remainder. NOTE: you need to take into account the simulation state starting from the cycle. i.e. Don't do simulation.process(remainder), since your airflow and initial state wont be correct. the remainder takes into account the cycle state.
+    return divisible*BigInt(cycleHeight)+BigInt(remainderHeight)+BigInt(nonCycleHeight);//our equation :P 
+```
