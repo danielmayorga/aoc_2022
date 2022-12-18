@@ -144,17 +144,17 @@ We use the `modulo` `%` operator to reduce the since each time we perform an ope
 
 ### Day 12
 
-DFS - Depth First Search.
+BFS - Breath First Search.
 
-Just depth first search the solution for part 1. I see people online talking about A* or Dijkra's algorithm. That's overkill and they don't really understand graph algorithms if people resort to that. 
+Just breath first search the solution for part 1. I see people online talking about A* or Dijkra's algorithm. That's overkill and they don't really understand graph algorithms if people resort to that. Use BFS if the graph has equal edges. 
 
 #### Part 2 is correct for my input but may not be universally correct
 
-My first thought was to reverse the traversal (from E to S vs part 1's S to E), but that would be more code.
+My first thought was to reverse the traversal (from E to a vs part 1's S to E), but that would be more code.
 
-I noticed all my `a` heights were in the left hand side so I did a hack in my code where I kept the same DFS and just set the cost of each newly encountered `a` to 0. Surprisingly that gave me the correct answer and I solved it pretty fast. However, that solution will not always work. There are positions in the graph that will break that logic. i.e. if the most optimal `a` is to the right most node past `E` from `S`.
+I noticed all my `a` heights were in the left hand side so I did a hack in my code where I kept the same BFS and just set the cost of each newly encountered `a` to 0. Surprisingly that gave me the correct answer and I solved it pretty fast. However, that solution will not always work, it only worked because my optimum path was a subset of the regular path. There are positions in the graph that will break that logic. i.e. if the most optimal `a` is to the right most node past `E` from `S`.
 
-I might revisit this with a correct solution, but this is advent of code. I only really care about MY solution.
+I might revisit this with a correct solution in a different branch for correctness, but this is advent of code. I only really care about MY solution.
 
 ### Day 13
 
@@ -217,7 +217,8 @@ While I'm confident in the performance of part 1, part 2 has me curious if there
 
 ### Day 16
 
-This problem is stumped me because I didn't know about all pairs shortest path, but knew I needed it.
+This problem originally stumped me because I didn't know about all pairs shortest path, but knew I needed it.
+I had to read about Floyd's Algorithm which is super straight forward and awesome example of DP.
 
 #### Part 1
 
@@ -233,13 +234,13 @@ I use a greedy algorithm to determine if the elephant or I should move.
 
 I have a memoized table of function parameters, if we are in a state that is NOT optimal. Backout. I think this is callled backtracking.
 
-My solution works in 6 seconds on my input
+My solution works in 6 seconds on my input. It's a bit ugly since I had to squeeze some more performance by using Arrays and numbers instead of Map/Object and strings. I have a more reable branch with code that runs a bit slower but is easier to follow.
 
 ### Day 17
 
 #### Part 1
 
-Implement the simulations.
+Implement the simulations. I used Object Oriented Design to create a class called Simulation. I used enums to make it easier to read things.
 
 #### Part 2
 
