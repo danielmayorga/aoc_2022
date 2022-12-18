@@ -256,3 +256,21 @@ My code may be a better indicator of how to find the cycle. After you find the c
     const remainderHeight = simulation.process(Number(remainder)+startCycle) - simulation.process(Number(startCycle)); //we find the remainder. NOTE: you need to take into account the simulation state starting from the cycle. i.e. Don't do simulation.process(remainder), since your airflow and initial state wont be correct. the remainder takes into account the cycle state.
     return divisible*BigInt(cycleHeight)+BigInt(remainderHeight)+BigInt(nonCycleHeight);//our equation :P 
 ```
+
+### Day 18
+
+#### Part 1
+
+Created a pretty simple algorithm called `adjacent`. if the diff of 1 axis is 1, and the rest are equal we return true.
+
+each point has 6 sides. If 2 points are adjacent just subtract those 2 sides from the total.
+
+#### Part 2
+
+Remark - My first solution failed since I thought we only cared about gaps of size 1 cubed, but we care about empty space within ocupied points(squares).
+
+I created a BFS algorithm with a twist, if we are outside a given range we (0-Max.Point(X,Y,Z)) then we return false and the visited points. We then memoized the `status` of the visited points so if we revisit them in the future we don't have to do the entire Bfs algorithm again.
+
+If we are successful, We memoize the visited points with status true.
+
+This day was wayyyyy easier than day 17 and 16 which is weird to me. 
