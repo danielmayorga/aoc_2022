@@ -1,4 +1,3 @@
-import { stat } from 'fs';
 import { readFile } from 'fs/promises';
 
 interface Point{
@@ -72,7 +71,7 @@ function part2(points: Point[]){
     const gapMemo = new Map<string, boolean>();
     function isGap(point: Point){
         const key = toKey(point);
-        if (set.has(key)){
+        if (cubeOccupied.has(key)){
             return false;//you're a square :P 
         }
         if (gapMemo.has(key)){
@@ -92,7 +91,7 @@ function part2(points: Point[]){
             const currPoint = queue.shift() as Point;
             for(let neighbor of generateNeighbors(currPoint)){
                 const neighborKey = toKey(neighbor);
-                if (!set.has(neighborKey) && !visited.has(neighborKey)){
+                if (!cubeOccupied.has(neighborKey) && !visited.has(neighborKey)){
                     if (!withinRange(neighbor)){
                         return { visited, status: false};
                     }
@@ -105,7 +104,7 @@ function part2(points: Point[]){
     }
 
     //find the gaps of air inbetween
-    const set = new Set(points.map(toKey));
+    const cubeOccupied = new Set(points.map(toKey));
     const gaps = points
                     .map(point => findAdjacentGapsInbetween(point))
                     .reduce((sum, curr) => sum+curr, 0);
