@@ -274,3 +274,12 @@ I created a BFS algorithm with a twist, if we are outside a given range we (0-Ma
 If we are successful, We memoize the visited points with status true.
 
 This day was wayyyyy easier than day 17 and 16 which is weird to me. 
+
+### Day 19
+
+9pm struck, and I thought about this for 30 mins and wrote the parser for it. 
+I couldn't think of a good approach that ran optimally so I went to bed instead.
+
+Sounds like a brute force, but I can't wrap my head on backtracking/path pruning. 
+
+This may be my last day, but I'll try to make an effort to solve this for the fun™ of it.
