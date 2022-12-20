@@ -277,9 +277,18 @@ This day was wayyyyy easier than day 17 and 16 which is weird to me.
 
 ### Day 19
 
-9pm struck, and I thought about this for 30 mins and wrote the parser for it. 
-I couldn't think of a good approach that ran optimally so I went to bed instead.
+Originally, this problem stumped me because although I knew there were permutations, I thought it was too big to brute force and didn't know of a backtracking way to do this. 
 
-Sounds like a brute force, but I can't wrap my head on backtracking/path pruning. 
+It has a lot of trial and error and I'm not confident that my solution is a general solution.
 
-This may be my last day, but I'll try to make an effort to solve this for the fun™ of it.
+I did this brute forcing with some heuristics for path pruning (don't go down this path).
+
+Here is my heuristics: (IDK if they are right, but I got the right answer for my input)
+1. If you can make a geode robot...make it. No other option is optimal.
+2. If you can't make a geode robot but have enough obsidian...wait don't do anything for a turn til you have more obsidian.
+3. If you can make an obsidian robot...make it. No other option is optimal.
+4. If you can't make an obsidian robot but have enough obsidian...wait don't do anything for a turn til you have more obsidian.
+5. It is not optimal to sit on more ore when you can make things
+6. It is not optimal to make more ore robots than the max cost of the highest recipe.
+
+On my machine it ran in ~30 seconds. It might take longer on different machines.
