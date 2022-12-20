@@ -1,69 +1,105 @@
 import { readFile } from 'fs/promises';
 
-//find element after the number 0
-function afterZero(mixList: number[]){
-    for(let i=0; i<mixList.length; i++){
-        if (mixList[i]===0){
-            const afterIndex = (i+1)%mixList.length;
-            return mixList[afterIndex];
-        }
-    }
-    throw new Error("this shouldn't happen, no zero?");
+interface MixItem{
+    value: number;
+    originalPosition: number;
+    prev: MixItem|undefined;
+    next: MixItem|undefined;
 }
 
-//convert a map's value and current position to key for cycle detection
-function toKey(map: Map<number, number>, currPosition: number){
-    let key = "";
-    for (let i=0; i<map.size; i++){
-        key+=map.get(i)+",";
+//find element after the number 0
+function findZero(mixList: MixItem){
+    while(mixList.value!==0){
+        mixList = mixList.next as MixItem;
     }
-    key+=currPosition;
-    return key;
+    return mixList;
+}
+
+function iterate(item: MixItem, moves: number){
+    for(let i=0; i<moves; i++){
+        item = item.next as MixItem;
+    }
+    return item;
+}
+
+function findPosition(item: MixItem, originalPosition: number){
+    while (item.originalPosition !== originalPosition){
+        item = item.next as MixItem;
+    }
+    return item;
+}
+
+function DebugHelper(item: MixItem, length: number){
+    let result = "";
+    for(let i=0; i<length; i++){
+        result+= item.value +", ";
+        item = item.next as MixItem;
+    }
+    console.log(result);
 }
 
 function part1(lines: number[]){
-    const originalPattern = lines;
-    const mixList = [...lines];
-    
-    //we need a position map to keep track of the numbers
-    //there may be duplicates
-    const positionMap = new Map<number, number>();//position to index
-    const indexMap = new Map<number, number>();//index to position
-    for (let i=0; i<originalPattern.length; i++){
-        positionMap.set(i,i);
-        indexMap.set(i,i);
+    const mixListArray = lines.map((value, originalPosition) => ({ value, originalPosition} as MixItem));
+    const start = mixListArray[0], end = mixListArray[mixListArray.length-1];
+    start.prev = end;
+    end.next = start;
+    for (let i=1; i<mixListArray.length; i++){
+        mixListArray[i].prev = mixListArray[i-1];
+        mixListArray[i-1].next = mixListArray[i];
     }
-    //let's do some cycle detection :P 
-    var visited = new Set<string>();
+
     //let's define the mix algorithm
-    function mix(position: number){
-        const num = mixList[position];
-        const newPosition = (num+position+mixList.length)%mixList.length;
-        //TODO shifting part needs work
-    }
-    let result = 0;
-    let cycleFound = false;
-    // go through the cycles
-    for (let i =1; i< 3001; i++){
-        const originalPosition = (i-1)%mixList.length;
-        const position = positionMap.get(originalPosition) as number;
-        //cycle detection
-        const key = toKey(positionMap, position);
-        if (visited.has(key) && !cycleFound){
-            //cycleFound = true;
+    function mix(currentNode: MixItem, length: number){
+        let num = currentNode.value;
+        const iterate = currentNode;
+        if (num > 0){
+            for(let i=0; i<num; i++){
+                //swap
+                let A = iterate.prev as MixItem;
+                let B = iterate as MixItem;
+                let C = iterate.next as MixItem;
+                let D = iterate.next!.next as MixItem;
+
+                B.next = D;
+                D.prev = B;
+
+                B.prev = C;
+                C.next = B;
+
+                A.next = C;
+                C.prev = A;
+            }
+        }else{
+            for (let i=num; i<0; i++){
+                let A = iterate.prev!.prev as MixItem;
+                let B = iterate.prev as MixItem;
+                let C = iterate as MixItem;
+                let D = iterate.next as MixItem;
+
+                B.next = D;
+                D.prev = B;
+
+                B.prev = C;
+                C.next = B;
+
+                A.next = C;
+                C.prev = A;
+            }
         }
-        visited.add(key);
+    }
+    //mix once
+    for (let originalPosition = 0; originalPosition< mixListArray.length; originalPosition++){
+        const currentNode = findPosition(start,originalPosition);
         //do the mix
-        mix(position);
-        //calculate after zero
-        if ((i%1000) === 0){
-            const after = afterZero(mixList)
-            result+=after;
-        }
+        mix(currentNode, mixListArray.length);
+        //DebugHelper(start, mixListArray.length);
     }
-
-
-    return result;
+    //find the zero node and iterate forward X amount
+    const zeroNode = findZero(start);
+    return [1000,2000,3000].map(iteration =>{
+        const iterateCount = iteration%mixListArray.length;
+        return iterate(zeroNode, iterateCount).value;
+    }).reduce((sum, curr) => sum+curr, 0);
 }
 
 function part2(lines: number[]){
