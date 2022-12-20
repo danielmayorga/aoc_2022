@@ -292,3 +292,7 @@ Here is my heuristics: (IDK if they are right, but I got the right answer for my
 6. It is not optimal to make more ore robots than the max cost of the highest recipe.
 
 On my machine it ran in ~30 seconds. It might take longer on different machines.
+
+### Day 20
+
+Work in Progress: Wrote some of the basic code, still have to optimize the mixing shifting portion
