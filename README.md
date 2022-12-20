@@ -295,4 +295,13 @@ On my machine it ran in ~30 seconds. It might take longer on different machines.
 
 ### Day 20
 
-Work in Progress: Wrote some of the basic code, still have to optimize the mixing shifting portion
+I created a circular Link List. 
+We move left if we're negative. We move right if we're positive.
+
+#### Part 2
+
+I modified the original algorithm. 
+If our value is negative we move left by Math.abs(Num) %(length-1).
+If our value is positive we move right by Num % (length-1);
+
+The trick is the modulus of length-1. The reason for this is that we do not count OURSELVES when we are iterating.
