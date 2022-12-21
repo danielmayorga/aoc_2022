@@ -23,15 +23,6 @@ function iterate(item: LinkListItem, moves: number){
     return item;
 }
 
-//find item based on the original unmix position.
-//we could make this a Map but we iterate through the link list in O(N) so we don't really have a benefit
-function findPosition(item: LinkListItem, originalPosition: number){
-    while (item.originalPosition !== originalPosition){
-        item = item.next as LinkListItem;
-    }
-    return item;
-}
-
 //Debug Helper, when I was originally writing part 1 I needed a good way to print out the current state
 //VS Code doesn't present the data in the watch tab well.
 function DebugHelper(item: LinkListItem, length: number){
@@ -107,8 +98,7 @@ function solution(lines: number[], mixCount: number, multiple: number){
         }
     }
     for(let i=0; i<mixCount; i++){
-        for (let originalPosition = 0; originalPosition< linkListArray.length; originalPosition++){
-            const currentNode = findPosition(start,originalPosition);
+        for (let currentNode of linkListArray){
             mix(currentNode, linkListArray.length);
             //DebugHelper(start, mixListArray.length);
         }
