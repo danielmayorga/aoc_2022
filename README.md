@@ -305,3 +305,13 @@ If our value is negative we move left by Math.abs(Num) %(length-1).
 If our value is positive we move right by Num % (length-1);
 
 The trick is the modulus of length-1. The reason for this is that we do not count OURSELVES when we are iterating.
+
+### Day 21
+
+#### Part 1
+
+Pretty straightforward implementation using closure
+
+#### Part 2 
+
+TBA
