@@ -5,7 +5,7 @@ interface Instruction{
     spaces: number;
 }
 
-const fileRaw = await readFile('input/2016 bonus/day01.txt', { encoding : 'utf-8'});                
+const fileRaw = await readFile('input/2016/day01.txt', { encoding : 'utf-8'});                
 const directions = fileRaw
                     .split(', ')
                     .map(segment => (
