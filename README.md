@@ -305,3 +305,27 @@ If our value is negative we move left by Math.abs(Num) %(length-1).
 If our value is positive we move right by Num % (length-1);
 
 The trick is the modulus of length-1. The reason for this is that we do not count OURSELVES when we are iterating.
+
+### Day 21
+
+#### Part 1
+
+My original implementation just contained closure. You can look at the previous commit for it.
+
+Since part 2 was introduced, I ended up removing the closure to not hide away (leftArg, rightArg and operation). Aside from that it's pretty straight forward.
+
+#### Part 2 
+
+This one was a bit trickier. 
+
+- I started with a function to determine which branch contained the "humn"(me) monkey. I flagged ever node on the branch that contained it.
+- I created a recursive helper function called solveForMe which works backwords. We're solving for "humn" which is X. Thankfully we only have one reference.
+- We have the following instruction (first operation second) = Value
+    - if first contains "humn", we evaluate solveForMe(Value inverseOperator secondEval, first);
+    - if second contains "humn", we evaluate solveForMe(Value inverseOperator firstEval, second);
+    - I grabbed a piece of paper and wrote down the different inverse operations. They require a bit of thinking.
+- Our base case is if we find "humn" we return the value that we should be equal to.
+
+#### Remarks
+
+I was tempted to cheese this challenge by printing out a string with "X" for "humn" and plugging it in to wolframalpha to solve but that wouldn't be a challenge.
