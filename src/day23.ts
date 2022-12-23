@@ -101,9 +101,14 @@ class Simulation{
         }
 
         this.#visited = new Map();
+        let change = false;
         for(let pair of proposalWho.entries()){
             if (pair[1].length === 1){
                 const {x,y} = proposalPosition.get(pair[0]) as Position;
+                if (this.#toKey(pair[1][0].x,pair[1][0].y) !== pair[0]){
+                    change = true;
+                }
+
                 this.#setPosition(x,y);
             }else {
                 for(let {x,y} of pair[1]){
@@ -112,6 +117,7 @@ class Simulation{
             }
         }
         this.#updateShift();
+        return change;
         //this.#printHelper();
     }
 
@@ -165,7 +171,12 @@ function part1(lines: string[]){
 }
 
 function part2(lines: string[]){
-
+    const simulation = new Simulation(lines);
+    let i = 1;
+    while (simulation.round()){
+        i++;
+    }
+    return i;
 }
 
 

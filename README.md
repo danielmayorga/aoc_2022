@@ -346,8 +346,13 @@ I hardcoded all the reorientations and moves specific to my input. This is NOT a
 
 #### Part 1
 
-Create the simulation with a Map instead of a multi dimensional array.
+Create the simulation with a Map instead of a multi dimensional array. 
+We have a proposal dictionary that takes in (string position) => (position[]), so we keep track of all the proposal for a new coordinate.
+If the array has more than 1 element don't do anything.
+
+Follow the defined rules (I didn't read them correctly so I lost time).
 
 #### Part 2
 
-TODO
+Add a flag to check if the position has changed. This was a relatively small change with my first implementation.
+We just checked the proposal dictionary and made sure the key and sole position in the position array don't match.
