@@ -125,8 +125,35 @@ class CubeGraph{
             (command === 'L') ?
             (direction+3) % 4 :
             (direction+1) % 4 ;
-    #next = (direction: Direction, currentNode: Node) => 
-        currentNode.neighbors[direction];
+    #rangeHelper(traveler: Traveler, columnMin:number, columnMax:number, rowMin: number, rowMax: number, direction: Direction){
+        const node = traveler.currentNode;
+        return  node.column<=columnMax && 
+                node.column>=columnMin &&
+                node.row <= rowMax     &&
+                node.row >= rowMin     &&
+                direction === traveler.direction;
+    }
+    #next(traveler: Traveler): Traveler{
+        const { currentNode, direction}  = traveler;
+        /** hardcode overflow - I'm not a math guy, just a humble code monkey
+         *      A  B
+         *      F
+         *   D  C
+         *   E
+         * 
+         * we'll standarize Up, Down, Left, Right neighbors
+         * 
+         * Everytime we cross a boundary we'll need to reorient ourselves
+         * ...ughhh this will be painful since there are 24 different crossings to consider :*(
+         */
+
+
+
+        //not crossing any boundaries
+        const next = currentNode.neighbors[direction]
+        if (next.isWall) return traveler;
+        return { currentNode: next, direction};
+    }
 
     constructor(rawGraph: string){
         const rawRows = rawGraph.split(/\r?\n/);
@@ -148,22 +175,22 @@ class CubeGraph{
             }
         }
 
-        /** hardcode overflow - I'm not a math guy, just a humble coder
-         *      A  B
-         *      F
-         *   D  C
-         *   E
-         */
-        const ACubeFace = nodeMap.get(this.#toKey(0,50)) as Node;
-        const BCubeFace = nodeMap.get(this.#toKey(0,100)) as Node;
-        const FCubeFace = nodeMap.get(this.#toKey(50,50)) as Node;
-        const CCubeFace = nodeMap.get(this.#toKey(100,50)) as Node;
-        const DCubeFace = nodeMap.get(this.#toKey(100,0)) as Node;
-        const ECubeFace = nodeMap.get(this.#toKey(150,0)) as Node;
+        for (let row=0; row<rawRows.length; row++){
+            const rawRow = rawRows[row];
+            for (let column =0; column < rawRow.length; column++){
+                const node = nodeMap.get(this.#toKey(row,column));
+                if (node != null){
+                    node.neighbors[Direction.Left] = nodeMap.get(this.#toKey(row,column-1)) as Node;
+                    node.neighbors[Direction.Right] = nodeMap.get(this.#toKey(row,column+1)) as Node;
+                    node.neighbors[Direction.Up] = nodeMap.get(this.#toKey(row-1,column)) as Node;
+                    node.neighbors[Direction.Down] = nodeMap.get(this.#toKey(row+1,column)) as Node;
+                }
+            }
+        }
     }
 
     travel = (commands: Command[]) => {
-        const traveler: Traveler = {
+        let traveler: Traveler = {
             direction: Direction.Right,
             currentNode: this.#firstNode,
         };
@@ -174,13 +201,14 @@ class CubeGraph{
                 case 'R':
                     traveler.direction = this.#reOrient(traveler.direction, command);
                     break;
-                default: 
+                default:
+                    let prev = traveler; 
                     for(let i=0; i<command; i++){
-                        const next = this.#next(traveler.direction, traveler.currentNode);
-                        if(next.isWall){
+                        traveler = this.#next(traveler);
+                        if (traveler === prev){
                             break;
                         }
-                        traveler.currentNode = next;
+                        prev = traveler;
                     }
             }
         }
@@ -196,7 +224,7 @@ function part1(commands: Command[], graph: Graph){
 }
 
 function part2(commands: Command[], graph: CubeGraph){
-    //return graph.travel(commands);
+    return graph.travel(commands);
 }
 
 const fileRaw = await readFile('input/day22.txt', { encoding : 'utf-8'});
