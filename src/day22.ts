@@ -118,23 +118,29 @@ class Graph{
     }
 }
 
+interface CubeTraveler{
+    node: CubeNode;
+    direction: Direction;
+}
+
+interface CubeNode{
+    row: number;
+    column: number;
+    isWall: boolean;
+}
+
 class CubeGraph{
-    #firstNode!: Node;
+    #firstNode!: CubeNode;
+    #nodeMap =  new Map<string, CubeNode> ();
     #toKey = (row: number, column: number) => row+","+column;
+    #getNode = (row: number, column: number) => this.#nodeMap.get(this.#toKey(row,column)) as CubeNode;
+    #setNode = (row: number, column: number, node: CubeNode) => this.#nodeMap.set(this.#toKey(row,column), node);
     #reOrient = (direction: Direction, command: 'L' | 'R'): Direction =>
             (command === 'L') ?
             (direction+3) % 4 :
             (direction+1) % 4 ;
-    #rangeHelper(traveler: Traveler, columnMin:number, columnMax:number, rowMin: number, rowMax: number, direction: Direction){
-        const node = traveler.currentNode;
-        return  node.column<=columnMax && 
-                node.column>=columnMin &&
-                node.row <= rowMax     &&
-                node.row >= rowMin     &&
-                direction === traveler.direction;
-    }
-    #next(traveler: Traveler): Traveler{
-        const { currentNode, direction}  = traveler;
+    #next(traveler: CubeTraveler): CubeTraveler{
+        const { node: { row, column }, direction}  = traveler;
         /** hardcode overflow - I'm not a math guy, just a humble code monkey
          *      A  B
          *      F
@@ -144,55 +150,183 @@ class CubeGraph{
          * we'll standarize Up, Down, Left, Right neighbors
          * 
          * Everytime we cross a boundary we'll need to reorient ourselves
-         * ...ughhh this will be painful since there are 24 different crossings to consider :*(
+         * We had 14 different combinations and I had 2 bugs when I originally wrote this that cost me an hour
          */
-
-
+        //A to E
+        if (row ===0 && column <100 && direction === Direction.Up){
+            const node = this.#getNode(100+column,0);
+            if (node.isWall) return traveler;
+            return ({
+                node,
+                direction: Direction.Right,
+            });
+        }
+        //E to A
+        if (column===0 && row >= 150 && direction === Direction.Left){
+            const node = this.#getNode(0,row-100);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Down,
+            })
+        }
+        //A to D
+        if (column===50 && row<50 && direction === Direction.Left){
+            const node = this.#getNode(149-row,0);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Right
+            })
+        }
+        //D to A
+        if (column===0 && row>=100 && row<150 && direction === Direction.Left){
+            const node = this.#getNode(149-row,50);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Right
+            })
+        }
+        //B to E
+        if (row===0 && column>=100 && direction === Direction.Up){
+            const node = this.#getNode(199,column-100);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Up
+            })
+        }
+        //E to B
+        if (row===199 && direction === Direction.Down){
+            const node = this.#getNode(0,column+100);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Down
+            })
+        }
+        //B to C
+        if (column ===149 && direction === Direction.Right){
+            const node = this.#getNode(149-row,99);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Left
+            })
+        }
+        //C to B
+        if (column === 99 && row>=100 && direction === Direction.Right){
+            const node = this.#getNode(149-row,149);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Left
+            })
+        }
+        //B to F
+        if (column>=100 && row === 49 && direction === Direction.Down){
+            const node = this.#getNode(column-50,99);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Left
+            });
+        }
+        //F to B
+        if (row >= 50 && row<=99 && column===99 && direction === Direction.Right){
+            const node = this.#getNode(49,50+row);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Up
+            });
+        }
+        //C to E
+        if(row===149 && column>=50 && direction === Direction.Down){
+            const node = this.#getNode(100+column,49);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Left
+            });
+        }
+        //E to C
+        if(row>=150 && column===49 && direction === Direction.Right){
+            const node = this.#getNode(149,row-100);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Up
+            });
+        }
+        //D to F
+        if(column <= 49 && row===100 && direction=== Direction.Up){
+            const node = this.#getNode(50+column,50);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Right
+            });
+        }
+        //F to D
+        if(column===50 && row>=50 && row<100 && direction===Direction.Left){
+            const node = this.#getNode(100,row-50);
+            if (node.isWall) return traveler;
+            return({
+                node,
+                direction: Direction.Down
+            });
+        }
 
         //not crossing any boundaries
-        const next = currentNode.neighbors[direction]
+        let newRow = row;
+        let newColumn = column;
+        switch(direction){
+            case Direction.Up:
+                newRow--;
+                break;
+            case Direction.Down:
+                newRow++;
+                break;
+            case Direction.Left:
+                newColumn--;
+                break;
+            case Direction.Right:
+                newColumn++;
+                break;
+        }
+
+        const next = this.#getNode(newRow, newColumn);
         if (next.isWall) return traveler;
-        return { currentNode: next, direction};
+        return { node: next, direction};
     }
 
     constructor(rawGraph: string){
         const rawRows = rawGraph.split(/\r?\n/);
-        const nodeMap = new Map<string, Node>();//maps row+column to node
         //create nodes and add entries to nodeMap, topMap, and leftMap
         for (let row=0; row<rawRows.length; row++){
             const rawRow = rawRows[row];
             for (let column =0; column < rawRow.length; column++){
+                
                 const char = rawRow[column];
                 if (char !== ' '){
-                    const node: Node = {
+                    const node: CubeNode = {
                         row,
                         column,
                         isWall: char === "#",
-                        neighbors: new Array(4)
                     };
-                    nodeMap.set(this.#toKey(row,column), node);
-                }
-            }
-        }
-
-        for (let row=0; row<rawRows.length; row++){
-            const rawRow = rawRows[row];
-            for (let column =0; column < rawRow.length; column++){
-                const node = nodeMap.get(this.#toKey(row,column));
-                if (node != null){
-                    node.neighbors[Direction.Left] = nodeMap.get(this.#toKey(row,column-1)) as Node;
-                    node.neighbors[Direction.Right] = nodeMap.get(this.#toKey(row,column+1)) as Node;
-                    node.neighbors[Direction.Up] = nodeMap.get(this.#toKey(row-1,column)) as Node;
-                    node.neighbors[Direction.Down] = nodeMap.get(this.#toKey(row+1,column)) as Node;
+                    this.#firstNode ??= node;
+                    this.#setNode(row,column, node);
                 }
             }
         }
     }
 
     travel = (commands: Command[]) => {
-        let traveler: Traveler = {
+        let traveler: CubeTraveler = {
             direction: Direction.Right,
-            currentNode: this.#firstNode,
+            node: this.#firstNode,
         };
 
         for (let command of commands){
@@ -213,8 +347,8 @@ class CubeGraph{
             }
         }
 
-        return  ((traveler.currentNode.row+1)*1000)+
-                ((traveler.currentNode.column+1)*4)+
+        return  ((traveler.node.row+1)*1000)+
+                ((traveler.node.column+1)*4)+
                 traveler.direction;
     }
 }

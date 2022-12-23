@@ -339,6 +339,5 @@ I created a graph with the correct Up, Down, Left, Right Neighbors to wrap aroun
 
 #### Part 2
 
-Working on this one. It's confusing to think of cube faces and spacial orientation.
-
-I'm going to most likely hardcode things in my input because I can't think of them in more abstract manners.
+I drew and cut out a paper cube.
+I hardcoded all the reorientations and moves specific to my input. This is NOT a general solution, but it solves my problem because I'm just a humble coder and not some mathematician.
