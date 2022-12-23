@@ -329,3 +329,16 @@ This one was a bit trickier.
 #### Remarks
 
 I was tempted to cheese this challenge by printing out a string with "X" for "humn" and plugging it in to wolframalpha to solve but that wouldn't be a challenge.
+
+
+### Day 22
+
+#### Part 1
+
+I created a graph with the correct Up, Down, Left, Right Neighbors to wrap around the grid. It was tedius. I wonder if there was a more efficient way to do it. I used a Map to contain every node, but still had to iterate (rows*maxColumn)
+
+#### Part 2
+
+Working on this one. It's confusing to think of cube faces and spacial orientation.
+
+I'm going to most likely hardcode things in my input because I can't think of them in more abstract manners.
