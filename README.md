@@ -356,3 +356,19 @@ Follow the defined rules (I didn't read them correctly so I lost time).
 
 Add a flag to check if the position has changed. This was a relatively small change with my first implementation.
 We just checked the proposal dictionary and made sure the key and sole position in the position array don't match.
+
+
+### Day 24
+
+We're almost done!
+
+#### Part 1
+
+We create a simulation. Each minute we update the map and iterate through all our candidate positions.
+We optimize a little bit by having a set of visited positions.
+We also have to take into account waiting at the entrance/exit(for part 2)
+We end when we reach the end. Simple graph traversal.
+
+#### Part 2
+
+Thankfully this was really easy because we retained state. We reverse the order to return (start at exit at the most optimal minute), and then run our function from part 1 when we reach the entrance again.
