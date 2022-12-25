@@ -372,3 +372,40 @@ We end when we reach the end. Simple graph traversal.
 #### Part 2
 
 Thankfully this was really easy because we retained state. We reverse the order to return (start at exit at the most optimal minute), and then run our function from part 1 when we reach the entrance again.
+
+
+### Day 25
+
+The problem is sorta a weird variant of the Classic toRomanNumeral and fromRomanNumeral.
+
+- we first converted all the string to numbers
+- we then summed the values
+- we then converted to the snafu string
+
+Converting from the string to number is pretty straight forward working right to left with a switch case.
+
+Converting from number to string was a bit tougher. I knew I wanted to mod and divide by 5, but getting the negatives to play well took a lot of tinkering. Originally I had `"210-="`, but I failed naturally because the modded values didn't correspond correctly. 
+I rethought the problem to `"012=-"`, 0 to 2 makes sense. = and - don't initially but do if you add 5 to the rolling sum.
+
+
+### Epilogue
+
+Finally...it's over. I get to relax, and enjoy my winter break :)
+I'm glad I went through this journey. There were times I thought about quitting, but stuck through it. 
+
+My college roommate Tom asked me, "Why do you do advent of code? Seems like a waste of time."
+
+I think I can answer it. 
+
+The greatest strength of advent of code is the community. 200_000 people started on the first problem. Every night there is a new one introduced. It's cool that there is a subreddit of people who share memes and joke about the problems we answer.
+
+People in the community find different reasons to participate:
+
+- Some want to become stronger programmers with more code confidence
+- Some want to be challenged
+- Some want to learn/improve on a language
+- Some make the challenge harder on themselves: like the dude using Excel to solve the problems :o 
+- Some like to make visualizations.
+- Some want to solve problems.
+
+I want to solve problems, and I like the memes people make. They push me to want to finish this. Next year I probably wont participate, but I'm glad I finished 2017, 2021, and 2022 with 50 stars and in total I have `220` stars spanning the rest of the years.
